@@ -2,28 +2,30 @@
 var vm = new Vue({
   el:'#show_paper',
   data:{
-    paperid: '',
-    test: ''
-    /*test:{
-      test_problem: [
-        { id: '1',problem: '1+1=?',type: 'keguan',point: '5',option1: '5',option2: '2',option3: '4',option4: '3',answer: '',},
-        { id: '2',problem: '你好吗？',type: 'zhuguan',point: '10',option1: '',option2: '',option3: '',option4: '',answer: '',}
-      ]
-    }*/
+    paper: '',
+    test:{
+      test_problem: []
+    }
   },
   methods:{
     submit_answer:function(){
-      this.$http.post(backend_server + 'test-manage/', this.test, {credentials: true})
+      postdata = {
+        paperid: this.paper.pid,
+        pname: this.paper.pname,
+        test: this.test
+      };
+      this.$http.post(backend_server + 'test-manage/', postdata, {credentials: true})
       .then(function(res){
         console.log(res.bodyText);
         var dataret = JSON.parse(res.bodyText);
         if (dataret.code == 200)
         {
-          alert('提交答案成功：用户' + dataret.stu);
+          alert('提交答案成功：' + dataret.stu + '的试卷' + dataret.pname);
+          window.location="student.html";  
         }
         else
         {
-          alert('提交答案失败(1)');
+          alert('提交答案失败(' + dataret.info + ')');
         }
       },function(res){
         console.log(res.status);
@@ -31,13 +33,14 @@ var vm = new Vue({
       });
     },
     get_test:function(){
-      this.$http.get(backend_server + 'test-manage/?id=' + this.paperid, {credentials: true})
+      this.$http.get(backend_server + 'test-manage/?paperid=' + this.paperid, {credentials: true})
       .then(function(res){
         console.log(res.bodyText);
         var dataret = JSON.parse(res.bodyText);
         if (dataret.code == 200)
         {
           this.test = dataret.test;
+          this.paper = dataret.test_info;
         }
         else
         {
